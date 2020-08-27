@@ -10,6 +10,7 @@ class Population:
     return abs((i[0]*1000 + i[1]*100 + i[2]*10 + i[3] + i[4]*1000 + i[5]*100 + i[6]*10 + i[1]) - (i[4]*10000 + i[5]*1000 + i[2]*100 + i[1]*10 + i[-1]))
 
   def create_first_gen(self):
+    self.pop = []
     for i in range(100):
       individuo = [random.randint(0,9) for f in range(8)]
       self.pop.append((individuo,self.get_fitness(individuo)))
@@ -56,14 +57,14 @@ class Population:
     return choosen
 
   def generate_n_pop(self, n):
-    start_time = time.time()
+    #start_time = time.time()
     for i in range(n):
-      self.add_crossoved_gen()
+      self.add_crossoved_gen(80)
       self.mutation()
       self.generate_new_pop()
-    end_time = time.time()
-    total = end_time - start_time
-    print(f"--- {total} segundos se passaram ao gerar 100 novas populacoes---\n")
+    #end_time = time.time()
+    #total = end_time - start_time
+    #print(f"--- {total} segundos se passaram ao gerar {n} novas populacoes---\n")
 
   def generate_new_pop(self):
     new_pop = []
@@ -105,23 +106,28 @@ class Population:
 
     return (child1, self.get_fitness(child1)), (child2, self.get_fitness(child2))
 
-  def add_crossoved_gen(self):
+  def add_crossoved_gen(self, num):
     parents = self.pop.copy()
-    while len(parents) > int(len(self.pop)/3):
-        p1 = parents.pop(random.randint(0,len(parents)-1))
-        p2 = parents.pop(random.randint(0,len(parents)-1))
-        aux1, aux2 = self.cycle_cross(p1[0], p2[0])
+    for i in range(num):
+        p1,p2 = self.get_positions_simple(len(parents)-1)
+        aux1, aux2 = self.cycle_cross(parents[p1][0], parents[p2][0])
         self.pop.append(aux1)
         self.pop.append(aux2)
 
-  def get_positions(self):
-    p1 = random.randint(0,7)
-    p2 = random.randint(0,7)
+  def get_positions(self, num=7):
+    p1 = random.randint(0,num)
+    p2 = random.randint(0,num)
 
     while p2 == p1:
       p2 = random.randint(0,7)
     
     return p1,p2
+
+  def get_positions_simple(self, num=7):
+    p1 = random.randint(0,num)
+    p2 = random.randint(0,num)
+    
+    return p1,p2  
 
   def mutation(self):
     for i in range(len(self.pop)):
