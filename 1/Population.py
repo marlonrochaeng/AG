@@ -1,4 +1,5 @@
 import random
+import time
 #sendmory
 class Population:
 
@@ -17,7 +18,7 @@ class Population:
     return sorted(self.pop, key = lambda x: x[1])
 
   def order_pop(self):
-    return self.pop.sort(key = lambda x: x[1])
+    self.pop.sort(key = lambda x: x[1])
   
   def get_letter_occurrence(self, i):
     occurrences = {}
@@ -34,15 +35,44 @@ class Population:
   def update_to_best_individuals(self):
     self.pop = self.pop[:70]
 
-  def roulette_wheel(self, choices):
-    max = sum(choices.values())
-    pick = random.uniform(0, max)
-    current = 0
-    for key, value in choices.items():
-        current += value
-        if current > pick:
-            return key
-  
+  def roulette_wheel(self):
+    fs = [i[1] for i in self.pop]
+
+    sum_fs = sum(fs)
+    max_fs = max(fs)
+    min_fs = min(fs)
+
+    p = random.random()*sum_fs
+    t = max_fs + min_fs
+
+    choosen = 0
+
+    for i in range(len(self.pop)):
+      p -= (t - self.pop[i][1])
+      if p < 0:
+        choosen = i
+        break
+    
+    return choosen
+
+  def generate_n_pop(self, n):
+    start_time = time.time()
+    for i in range(n):
+      self.add_crossoved_gen()
+      self.mutation()
+      self.generate_new_pop()
+    end_time = time.time()
+    total = end_time - start_time
+    print(f"--- {total} segundos se passaram ao gerar 100 novas populacoes---\n")
+
+  def generate_new_pop(self):
+    new_pop = []
+    for i in range(100):
+      self.order_pop()
+      new_pop.append(self.pop.pop(self.roulette_wheel()))
+
+    self.pop = new_pop
+
   def create_new_individual(self):
     individual = []
     for i in range(8):
@@ -84,4 +114,21 @@ class Population:
         self.pop.append(aux1)
         self.pop.append(aux2)
 
+  def get_positions(self):
+    p1 = random.randint(0,7)
+    p2 = random.randint(0,7)
+
+    while p2 == p1:
+      p2 = random.randint(0,7)
     
+    return p1,p2
+
+  def mutation(self):
+    for i in range(len(self.pop)):
+      if random.uniform(0,100) <= 3:
+        p1, p2 = self.get_positions()
+        aux = self.pop[i][0][p1]
+        self.pop[i][0][p1] = self.pop[i][0][p2]
+        self.pop[i][0][p2] = aux
+        self.pop[i] = self.pop[i][0], self.get_fitness(self.pop[i][0])
+
