@@ -69,7 +69,7 @@ class Population:
   def generate_new_pop(self):
     new_pop = []
     for i in range(100):
-      self.order_pop()
+      #self.order_pop()
       new_pop.append(self.pop.pop(self.roulette_wheel()))
 
     self.pop = new_pop
