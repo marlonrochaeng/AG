@@ -106,18 +106,22 @@ class Population:
     #print(f"--- {total} segundos se passaram ao gerar {n} novas populacoes---\n")
 
   def generate_new_pop(self):
-    new_pop = []
+    new_pop = self.pop[0:100]
+    new_pop.sort(key = lambda x: x[1])
+    new_pop = new_pop[:20]
+    self.pop = self.pop[100:]
     self.order_pop()
-    #for i in range(100):
-    #  pos = self.linear_rank()
+    for i in range(80):
+      pos = self.roulette_wheel()
       #print("Pos:",pos)
       #print("Tam:",len(self.pop))
-    #  new_pop.append(self.pop.pop(pos))
+      new_pop.append(self.pop.pop(pos))
       #print("Position:",pos)
       #print("Individual:",self.pop[pos])
 
-    #self.pop = new_pop
-    self.pop = self.pop[0:100]
+    self.pop = new_pop
+    #self.pop = self.pop[0:100]
+    
   
   def linear_rank(self):
     pos = []
@@ -202,21 +206,6 @@ class Population:
       child_2[i] = aux
 
     return [(child_1, self.get_fitness(child_1)), (child_2, self.get_fitness(child_2))]
-
-  def add_crossoved_gen(self, num):
-    aux_pop = []
-    parents = self.pop.copy()
-    self.order_pop_reverse()
-
-    for i in range(num):
-      #p1,p2 = self.get_positions(len(parents)-1)
-      #p1,p2 = self.linear_rank(), self.linear_rank()
-      #p1,p2 = self.tournament(), self.tournament()
-      #aux1, aux2 = self.cycle_cross(parents[p1][0], parents[p2][0])
-      aux1, aux2 = self.pmx()
-      aux_pop.append(aux1)
-      aux_pop.append(aux2)
-    self.pop += aux_pop
 
   def tournament(self):
     p1, p2 = self.get_positions(len(self.pop)-1)
@@ -348,3 +337,17 @@ class Population:
         self.pop[i][0][p2] = aux
         self.pop[i] = self.pop[i][0], self.get_fitness(self.pop[i][0])
 
+  def add_crossoved_gen(self, num):
+    aux_pop = []
+    parents = self.pop.copy()
+    #self.order_pop_reverse()
+
+    for i in range(num):
+      #p1,p2 = self.get_positions(len(parents)-1)
+      #p1,p2 = self.tournament(), self.tournament()
+      #p1,p2 = self.rouletteWheelSelect(), self.rouletteWheelSelect()
+      #aux1, aux2 = self.cycle_cross(parents[p1][0], parents[p2][0])
+      aux1, aux2 = self.pmx()
+      aux_pop.append(aux1)
+      aux_pop.append(aux2)
+    self.pop += aux_pop

@@ -7,8 +7,26 @@ class Population:
   def __init__(self):
     self.pop = []
 
-  def get_fitness(self, i):
-    return abs((i[0]*1000 + i[1]*100 + i[2]*10 + i[3] + i[4]*1000 + i[5]*100 + i[6]*10 + i[1]) - (i[4]*10000 + i[5]*1000 + i[2]*100 + i[1]*10 + i[-1]))
+  def get_fitness(self, i, type_of):
+    if type_of == 1:
+      return abs((i[7] - (i[3] + i[1])) + (i[1] - (i[2] + i[6])) + (i[2] - (i[1] + i[5])) + (10 + i[5] - (i[4] + i[0])))
+    elif type_of == 2:
+      #eat that apple eathple e0 a1 t2 h3 p4 l5 e6
+      #apple - eat + that
+      return abs((i[0] - (2 * i[2])) + (i[4] - (i[3] + i[6])) + (i[2] - i[4]) + (i[5] - 2*i[1]))
+    elif type_of == 3:
+      #cross roads danger c0 r1 o2 s3 a4 d5 n6 g7 e8
+      #danger - cross roads
+      return abs((i[1] - 2*i[3]) + (i[8] - (i[5] + i[3])) + (i[7] - (i[4] + i[2])) + (i[6] - (i[2] + i[1])) + (i[5]*10 + i[4] - (i[1] + i[0])))
+    elif type_of == 4:
+      #coca cola oasis coalsi c0 o1 a2 l3 s4 i5
+      #oasis - coca + cola
+      return abs((i[4] - 2*i[2]) + (i[5] - (i[3] + i[0])) + (i[4] - 2*i[1]) + (i[1]*10 + i[2] - i[0]*2))
+    elif type_of == 5:
+      #donald gerald robert d0 o1 n2 a3 l4 g5 e6 r7 b8 t9
+      #012340 567340 718679
+
+      return abs((i[9] - 2*i[0]) + (i[7] - 2*i[4]) + (i[6] - 2*i[3]) + (i[8] - (i[7] + i[2])) + (i[1] - (i[1] + i[6])) + (i[7] - (i[5] + i[0])))
 
   def create_first_gen(self):
     self.pop = []
@@ -17,7 +35,7 @@ class Population:
       individuo = []
       while options:
         individuo.append(options.pop(options.index(random.choice(options))))
-      self.pop.append((individuo,self.get_fitness(individuo)))
+      self.pop.append((individuo,self.get_fitness(individuo,2)))
   
   def get_ordered_pop(self):
     return sorted(self.pop, key = lambda x: x[1])
@@ -84,8 +102,8 @@ class Population:
     p1_index, p2_index = self.get_positions(99)
     temp1 = self.pop[p1_index][0][:pos] + self.pop[p2_index][0][pos:]
     temp2 = self.pop[p2_index][0][:pos] + self.pop[p1_index][0][pos:]
-    child1 = temp1, self.get_fitness(temp1)
-    child2 = temp2, self.get_fitness(temp1)
+    child1 = temp1, self.get_fitness(temp1,2)
+    child2 = temp2, self.get_fitness(temp1,2)
 
     return child1, child2
 
@@ -93,7 +111,7 @@ class Population:
     for i in pos:
       child1, child2 = self.single_crossover(i)
 
-    return [(child1[0], self.get_fitness(child1[0])) , (child2[0], self.get_fitness(child2[0]))]
+    return [(child1[0], self.get_fitness(child1[0],2)) , (child2[0], self.get_fitness(child2[0],2))]
 
   def generate_n_pop(self, n):
     #start_time = time.time()
@@ -154,7 +172,7 @@ class Population:
   def complete_population(self):
     for i in range(30):
       individual = self.create_new_individual()
-      self.pop.append((individual,self.get_fitness(individual)))
+      self.pop.append((individual,self.get_fitness(individual,2)))
 
   def cycle_cross(self, p1, p2):
     cycles = [-1]*len(p1)
@@ -173,7 +191,7 @@ class Population:
     child1 = [p1[i] if n%2 else p2[i] for i,n in enumerate(cycles)]
     child2 = [p2[i] if n%2 else p1[i] for i,n in enumerate(cycles)]
 
-    return (child1, self.get_fitness(child1)), (child2, self.get_fitness(child2))
+    return (child1, self.get_fitness(child1,2)), (child2, self.get_fitness(child2,2))
 
   def cx_modified(self):
     #representation = p1
@@ -201,22 +219,9 @@ class Population:
       child_1[i] = child_2[i]
       child_2[i] = aux
 
-    return [(child_1, self.get_fitness(child_1)), (child_2, self.get_fitness(child_2))]
+    return [(child_1, self.get_fitness(child_1,2)), (child_2, self.get_fitness(child_2,2))]
 
-  def add_crossoved_gen(self, num):
-    aux_pop = []
-    parents = self.pop.copy()
-    self.order_pop_reverse()
 
-    for i in range(num):
-      #p1,p2 = self.get_positions(len(parents)-1)
-      #p1,p2 = self.linear_rank(), self.linear_rank()
-      #p1,p2 = self.tournament(), self.tournament()
-      #aux1, aux2 = self.cycle_cross(parents[p1][0], parents[p2][0])
-      aux1, aux2 = self.pmx()
-      aux_pop.append(aux1)
-      aux_pop.append(aux2)
-    self.pop += aux_pop
 
   def tournament(self):
     p1, p2 = self.get_positions(len(self.pop)-1)
@@ -236,9 +241,9 @@ class Population:
     tam = 10
     p1, p2 = [0] * tam, [0] * tam
 
-    #parent1, parent2 = self.rouletteWheelSelect(), self.rouletteWheelSelect()
+    parent1, parent2 = self.rouletteWheelSelect(), self.rouletteWheelSelect()
     #parent1, parent2 = self.linear_rank(), self.linear_rank()
-    parent1, parent2 = self.tournament(), self.tournament()
+    #parent1, parent2 = self.tournament(), self.tournament()
 
     ind1 = self.pop[parent1][0].copy()
     ind2 = self.pop[parent2][0].copy()
@@ -266,7 +271,7 @@ class Population:
       p1[temp1], p1[temp2] = p1[temp2], p1[temp1]
       p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
 
-    return (ind1, self.get_fitness(ind1)), (ind2, self.get_fitness(ind2))
+    return (ind1, self.get_fitness(ind1,2)), (ind2, self.get_fitness(ind2,2))
 
   def cx_cross_pmx(self):
     p1,p2 = self.get_positions(9)
@@ -320,7 +325,7 @@ class Population:
     print(parent1_map,filho1)
     print(parent2_map,filho2)
     
-    return [(filho1, self.get_fitness(filho1)), (filho2, self.get_fitness(filho2))]
+    return [(filho1, self.get_fitness(filho1,2)), (filho2, self.get_fitness(filho2,2))]
 
     
 
@@ -341,10 +346,24 @@ class Population:
 
   def mutation(self):
     for i in range(len(self.pop)):
-      if random.uniform(0,100) <= 20:
+      if random.uniform(0,100) <= 2:
         p1, p2 = self.get_positions()
         aux = self.pop[i][0][p1]
         self.pop[i][0][p1] = self.pop[i][0][p2]
         self.pop[i][0][p2] = aux
-        self.pop[i] = self.pop[i][0], self.get_fitness(self.pop[i][0])
+        self.pop[i] = self.pop[i][0], self.get_fitness(self.pop[i][0],2)
 
+  def add_crossoved_gen(self, num):
+    aux_pop = []
+    parents = self.pop.copy()
+    #self.order_pop_reverse()
+
+    for i in range(num):
+      #p1,p2 = self.get_positions(len(parents)-1)
+      #p1,p2 = self.linear_rank(), self.linear_rank()
+      #p1,p2 = self.tournament(), self.tournament()
+      #aux1, aux2 = self.cycle_cross(parents[p1][0], parents[p2][0])
+      aux1, aux2 = self.pmx()
+      aux_pop.append(aux1)
+      aux_pop.append(aux2)
+    self.pop += aux_pop

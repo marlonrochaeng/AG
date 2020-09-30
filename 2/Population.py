@@ -12,7 +12,7 @@ class Population:
 
   def create_first_gen(self):
     self.pop = []
-    for i in range(100):
+    for i in range(250):
       options = list(range(10))
       individuo = []
       while options:
@@ -81,7 +81,9 @@ class Population:
     return i
 
   def single_crossover(self, pos):
-    p1_index, p2_index = self.get_positions(99)
+    p1_index, p2_index = self.rouletteWheelSelect(), self.rouletteWheelSelect()
+    while p1_index == p2_index:
+      p2_index = self.rouletteWheelSelect()
     temp1 = self.pop[p1_index][0][:pos] + self.pop[p2_index][0][pos:]
     temp2 = self.pop[p2_index][0][:pos] + self.pop[p1_index][0][pos:]
     child1 = temp1, self.get_fitness(temp1)
@@ -117,7 +119,7 @@ class Population:
       #print("Individual:",self.pop[pos])
 
     #self.pop = new_pop
-    self.pop = self.pop[0:100]
+    self.pop = self.pop[0:250]
   
   def linear_rank(self):
     pos = []
@@ -203,21 +205,6 @@ class Population:
 
     return [(child_1, self.get_fitness(child_1)), (child_2, self.get_fitness(child_2))]
 
-  def add_crossoved_gen(self, num):
-    aux_pop = []
-    parents = self.pop.copy()
-    self.order_pop_reverse()
-
-    for i in range(num):
-      #p1,p2 = self.get_positions(len(parents)-1)
-      #p1,p2 = self.linear_rank(), self.linear_rank()
-      #p1,p2 = self.tournament(), self.tournament()
-      #aux1, aux2 = self.cycle_cross(parents[p1][0], parents[p2][0])
-      aux1, aux2 = self.pmx()
-      aux_pop.append(aux1)
-      aux_pop.append(aux2)
-    self.pop += aux_pop
-
   def tournament(self):
     p1, p2 = self.get_positions(len(self.pop)-1)
     p3 = random.randint(0,99)
@@ -236,9 +223,11 @@ class Population:
     tam = 10
     p1, p2 = [0] * tam, [0] * tam
 
-    #parent1, parent2 = self.rouletteWheelSelect(), self.rouletteWheelSelect()
+    parent1, parent2 = self.rouletteWheelSelect(), self.rouletteWheelSelect()
+    while parent1 == parent2:
+      parent2 = self.rouletteWheelSelect()
     #parent1, parent2 = self.linear_rank(), self.linear_rank()
-    parent1, parent2 = self.tournament(), self.tournament()
+    #parent1, parent2 = self.tournament(), self.tournament()
 
     ind1 = self.pop[parent1][0].copy()
     ind2 = self.pop[parent2][0].copy()
@@ -339,9 +328,25 @@ class Population:
     
     return p1,p2  
 
+  def add_crossoved_gen(self, num):
+    aux_pop = []
+    parents = self.pop.copy()
+    self.order_pop_reverse()
+
+    for i in range(num):
+      
+      #p1,p2 = self.linear_rank(), self.linear_rank()
+      #p1,p2 = self.tournament(), self.tournament()
+      #aux1, aux2 = self.cycle_cross(parents[p1][0], parents[p2][0])
+      #aux1, aux2 = self.pmx()
+      aux1, aux2 = self.multi_crossover(self.get_positions(9))
+      aux_pop.append(aux1)
+      aux_pop.append(aux2)
+    self.pop += aux_pop
+
   def mutation(self):
     for i in range(len(self.pop)):
-      if random.uniform(0,100) <= 20:
+      if random.uniform(0,250) <= 25:
         p1, p2 = self.get_positions()
         aux = self.pop[i][0][p1]
         self.pop[i][0][p1] = self.pop[i][0][p2]
